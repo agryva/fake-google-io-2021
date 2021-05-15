@@ -14,11 +14,11 @@ class TextStyleCustom {
     TextDecoration? decoration
   }) {
     if (fontWeight == null) fontWeight = FontWeight.w700;
-    if (color == null) color = Color(0xff202124);
+    if (color == null) color = Colors.white;
 
     return TextStyle(
       fontFamily: FontFamily.googleSans,
-      color: Colors.white,
+      color: color,
       fontSize: fontSize,
       fontWeight: fontWeight,
       decorationColor: decorationColor,

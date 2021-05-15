@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fake_google_io/data/model/product_model.dart';
 import 'package:fake_google_io/gen/assets.gen.dart';
@@ -6,6 +7,8 @@ import 'package:fake_google_io/gen/fonts.gen.dart';
 import 'package:fake_google_io/utils/bordered_text.dart';
 import 'package:fake_google_io/utils/helpers.dart';
 import 'package:fake_google_io/utils/text_style.dart';
+import 'package:fake_google_io/widget/custom_circle.dart';
+import 'package:fake_google_io/widget/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
@@ -87,17 +90,20 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          width: Helpers.getWidthPageSize(context),
-          height: Helpers.getHeightPageSize(context),
-          child: RubberBottomSheet(
-            scrollController: _scrollController,
-            lowerLayer: _getLowerLayer(),
-            upperLayer: _getUpperLayer(),
-            animationController: _controller!,
-          )
+      backgroundColor: Color(0xff202124),
+      body: Container(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top,
+          bottom: MediaQuery.of(context).padding.bottom,
         ),
+        width: Helpers.getWidthPageSize(context),
+        height: Helpers.getHeightPageSize(context),
+        child: RubberBottomSheet(
+          scrollController: _scrollController,
+          lowerLayer: _getLowerLayer(),
+          upperLayer: _getUpperLayer(),
+          animationController: _controller!,
+        )
       ),
     );
   }
@@ -119,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage>
             child: FadeIn(
               duration: Duration(milliseconds: 500),
               delay: Duration(milliseconds: 200),
-              child: createCircle(
+              child: CustomCircle(
                 size: 40,
                 color: Color(0xffF8BB2D)
               ),
@@ -132,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage>
             child: Bounce(
               duration: Duration(milliseconds: 500),
               delay: Duration(milliseconds: 200),
-              child: createCircle(
+              child: CustomCircle(
                 size: 40,
                 color: Color(0xff34A753)
               ),
@@ -145,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage>
             child: BounceInUp(
               duration: Duration(milliseconds: 500),
               delay: Duration(milliseconds: 200),
-              child: createCircle(
+              child: CustomCircle(
                 size: 40,
                 color: Color(0xffEA4336)
               ),
@@ -164,28 +170,45 @@ class _MyHomePageState extends State<MyHomePage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _countdownWidget(),
-                    SizedBox(height: 32,),
-                    Bounce(
-                      child: Icon(
-                        Ionicons.arrow_up_circle_outline,
-                        color: Colors.white,
+                    SizedBox(height: 24,),
+                    DefaultTextStyle(
+                      style: TextStyle(
+                        fontFamily: FontFamily.googleSans,
+                        color: Colors.white ,
+                        decorationColor: Color(0xff202124),
+                        decoration: TextDecoration.none,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
+                      child: AnimatedTextKit(
+                        isRepeatingAnimation: false,
+                        animatedTexts: [
+                          TypewriterAnimatedText(
+                              "I/O is back, online and free for everyone Join us Live",
+                              textAlign: TextAlign.center
+                          )
+                        ],
+                      )
                     ),
-                    SizedBox(height: 4,),
-                    BorderedText(
-                      strokeWidth: 2,
-                      strokeColor: Colors.white,
-                      child: Text(
-                        "Scroll Up",
-                        style: TextStyle(
-                          fontFamily: FontFamily.googleSans,
-                          color: Color(0xff202124) ,
-                          decorationColor: Color(0xff202124),
-                          decoration: TextDecoration.none,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
+                    SizedBox(height: 16,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: Color(0xffF9BB2D),
+                            borderRadius: BorderRadius.circular(16)
+                          ),
+                          child: Text(
+                              "May 18-20",
+                              style: TextStyleCustom.textTimerStyle(
+                                fontSize: 12,
+                                color: Color(0xff121215)
+                              )
+                          ),
                         ),
-                      ),
+                      ],
                     )
                   ],
                 ),
@@ -471,7 +494,7 @@ class _MyHomePageState extends State<MyHomePage>
                   imageUrl: "https://events.google.com/io/assets/io_flag.jpeg",
                   height: 250,
                   fit: BoxFit.fill,
-                  placeholder: (context, url) => CircularProgressIndicator(),
+                  placeholder: (context, url) => ImageLoadingWidget(),
                   errorWidget: (context, url, error) =>  SvgPicture.asset(
                       Assets.graphics.logo
                   ),
@@ -611,14 +634,16 @@ class _MyHomePageState extends State<MyHomePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: Helpers.getWidthPageSize(context),
-            height: 160,
-            decoration: BoxDecoration(
-              color: Color(0xff34A853),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              imageUrl: "https://events.google.com/io/assets/sessions/IO21_104.jpg",
+              width: Helpers.getWidthPageSize(context),
+              height: 160,
+              fit: BoxFit.fill,
+              placeholder: (context, url) => ImageLoadingWidget(),
+              errorWidget: (context, url, error) =>  SvgPicture.asset(
+                  Assets.graphics.logo
               ),
             ),
           ),
@@ -713,13 +738,4 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  Widget createCircle({required double size, required Color color}) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: new BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),);
-  }
 }
