@@ -1,16 +1,15 @@
 # fake_google_io
 
-Fake Google IO
+Fake Google IO made with flutter (Not official!)
 
-## Getting Started
+## Inspiration
 
-This project is a starting point for a Flutter application.
+This application was made to enliven the Google I/O 2021 event which was held online on 18-20 May 2021, this application was inspired by the official Google I/O website.
 
-A few resources to get you started if this is your first Flutter project:
+ <img src="https://raw.githubusercontent.com/agryva/fake-google-io-2021/master/screen/mockup.png" width="379px;"/><br /><sub><b>Range</b></sub> |
+| :---: |
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This application is only a UI design and has not done data retrieval from the Google I/O API itself
+
+If you want to develop it again, I am happy but remember to include the copyright :)
