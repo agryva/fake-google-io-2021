@@ -13,6 +13,7 @@ class $GraphicsGen {
   AssetGenImage get firebase => const AssetGenImage('graphics/firebase.png');
   AssetGenImage get flutter => const AssetGenImage('graphics/flutter.png');
   String get logo => 'graphics/logo.svg';
+  String get qrUrl => 'graphics/qr_url.svg';
 }
 
 class Assets {

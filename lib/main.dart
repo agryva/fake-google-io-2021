@@ -1,9 +1,12 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:bouncing_widget/bouncing_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fake_google_io/data/model/product_model.dart';
+import 'package:fake_google_io/detail_page.dart';
 import 'package:fake_google_io/gen/assets.gen.dart';
 import 'package:fake_google_io/gen/fonts.gen.dart';
+import 'package:fake_google_io/splashscreen.dart';
 import 'package:fake_google_io/utils/bordered_text.dart';
 import 'package:fake_google_io/utils/helpers.dart';
 import 'package:fake_google_io/utils/text_style.dart';
@@ -16,6 +19,7 @@ import 'package:flutter_countdown_timer/index.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:rubber/rubber.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,13 +34,13 @@ class MyApp extends StatelessWidget {
       statusBarIconBrightness: Brightness.dark,
     ));
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Google I/O Fake',
       theme: ThemeData(
         primarySwatch: Helpers.generateMaterialColor(Color(0xff202124)),
         canvasColor: Colors.transparent,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(),
+      home: SplashScreen(),
     );
   }
 }
@@ -50,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
+  GlobalKey _one = GlobalKey();
 
   ScrollController _scrollController = ScrollController();
   int endTime = DateTime(2021, 5, 19).millisecondsSinceEpoch + 1000 * 30;
@@ -60,18 +65,22 @@ class _MyHomePageState extends State<MyHomePage>
     ProductModel(
       icon: Assets.graphics.android,
       type: "svg",
+      name: "Android"
     ),
     ProductModel(
       icon: Assets.graphics.cloud,
       type: "svg",
+      name: "Google Cloud",
     ),
     ProductModel(
       icon: Assets.graphics.firebase.assetName,
       type: "png",
+      name: "Firebase",
     ),
     ProductModel(
       icon: Assets.graphics.flutter.assetName,
       type: "png",
+      name: "Flutter",
     ),
   ];
 
@@ -81,7 +90,8 @@ class _MyHomePageState extends State<MyHomePage>
         vsync: this,
         initialValue: 0.6,
         lowerBoundValue: AnimationControllerValue(percentage: 0.6),
-        halfBoundValue: AnimationControllerValue(percentage: 0.8),
+        halfBoundValue: AnimationControllerValue(percentage: 0.92),
+        upperBoundValue: AnimationControllerValue(percentage: 0.92),
         duration: Duration(milliseconds: 200));
     super.initState();
   }
@@ -158,9 +168,24 @@ class _MyHomePageState extends State<MyHomePage>
             ),
           ),
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SvgPicture.asset(
-                  Assets.graphics.logo
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SvgPicture.asset(
+                      Assets.graphics.logo
+                  ),
+                  InkWell(
+                    onTap: () {
+                      _launchURL("https://events.google.com/io/?lng=en");
+                    },
+                    child: Icon(
+                      Ionicons.information_outline,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
               ),
               Container(
                 width: Helpers.getWidthPageSize(context),
@@ -455,7 +480,7 @@ class _MyHomePageState extends State<MyHomePage>
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              return createContentList(false);
+              return createContentList(160);
             },
           ),
         )
@@ -480,7 +505,7 @@ class _MyHomePageState extends State<MyHomePage>
         SizedBox(height: 8,),
         Container(
           width: Helpers.getWidthPageSize(context),
-          height: 250,
+          height: 210,
           margin: EdgeInsets.fromLTRB(8, 16, 8, 0),
           decoration: BoxDecoration(
               border: Border.all(color: Color(0xff5f6368)),
@@ -492,8 +517,8 @@ class _MyHomePageState extends State<MyHomePage>
                 borderRadius: BorderRadius.circular(8),
                 child: CachedNetworkImage(
                   imageUrl: "https://events.google.com/io/assets/io_flag.jpeg",
-                  height: 250,
-                  fit: BoxFit.fill,
+                  height: 210,
+                  fit: BoxFit.cover,
                   placeholder: (context, url) => ImageLoadingWidget(),
                   errorWidget: (context, url, error) =>  SvgPicture.asset(
                       Assets.graphics.logo
@@ -504,7 +529,7 @@ class _MyHomePageState extends State<MyHomePage>
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   width: Helpers.getWidthPageSize(context),
-                  height: 250,
+                  height: 210,
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.3)
                   ),
@@ -568,25 +593,41 @@ class _MyHomePageState extends State<MyHomePage>
           ),
         ),
         SizedBox(height: 24,),
-        Row(
-          children: [
-            for (int i = 0; i < _productModel.length; i++) ... [
-              Expanded(
-                child: createProductCircle(
-                    icon: _productModel[i].icon,
-                    type: _productModel[i].type
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              for (int i = 0; i < _productModel.length; i++) ... [
+                Expanded(
+                  child: BouncingWidget(
+                    duration: Duration(milliseconds: 100),
+                    scaleFactor: 1.5,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(_productModel[i].name),
+                          behavior: SnackBarBehavior.floating,
+                        )
+                      );
+                    },
+                    child: createProductCircle(
+                        icon: _productModel[i].icon,
+                        type: _productModel[i].type
+                    ),
+                  ),
                 ),
-              )
-            ]
-          ],
+                SizedBox(width: 8,),
+              ]
+            ],
+          ),
         ),
-        SizedBox(height: 24,),
+
         ListView.builder(
           itemCount: 6,
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
-            return createContentList(true);
+            return createContentList(190, paddingBottom: 16);
           },
         )
       ],
@@ -622,120 +663,132 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  Widget createContentList(bool setHeight) {
-    return Container(
-      width: Helpers.getWidthPageSize(context) * 0.8,
-      margin: EdgeInsets.fromLTRB(8, 16, 8, 15),
-      decoration: BoxDecoration(
-          border: Border.all(color: Color(0xff5f6368)),
-          borderRadius: BorderRadius.circular(8)
-      ),
-      padding: setHeight ? EdgeInsets.only(bottom: 16) : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              imageUrl: "https://events.google.com/io/assets/sessions/IO21_104.jpg",
-              width: Helpers.getWidthPageSize(context),
-              height: 160,
-              fit: BoxFit.fill,
-              placeholder: (context, url) => ImageLoadingWidget(),
-              errorWidget: (context, url, error) =>  SvgPicture.asset(
-                  Assets.graphics.logo
+  Widget createContentList(double bannerHeight, {double? paddingBottom}) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DetailPage()),
+        );
+      },
+      child: Container(
+        width: Helpers.getWidthPageSize(context) * 0.8,
+        margin: EdgeInsets.fromLTRB(8, 16, 8, 15),
+        padding: paddingBottom != null ? EdgeInsets.only(bottom: paddingBottom) : null,
+        decoration: BoxDecoration(
+            border: Border.all(color: Color(0xff5f6368)),
+            borderRadius: BorderRadius.circular(8)
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: "https://events.google.com/io/assets/sessions/IO21_104.jpg",
+                width: Helpers.getWidthPageSize(context),
+                height: bannerHeight,
+                fit: BoxFit.fill,
+                placeholder: (context, url) => ImageLoadingWidget(),
+                errorWidget: (context, url, error) =>  SvgPicture.asset(
+                    Assets.graphics.logo
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 16,),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "DAY 2, 10:00PM - 11:00PM",
-                        style: TextStyleCustom.textTimerStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
+            SizedBox(height: 16,),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "DAY 2, 10:00PM - 11:00PM",
+                          style: TextStyleCustom.textTimerStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 8,),
-                    Icon(
-                      Ionicons.ticket_outline,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    SizedBox(width: 16,),
-                    Icon(
-                      Ionicons.star_outline,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16,),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Fireside chat with Flutter + Firebase [Americas]",
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyleCustom.textTimerStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                      SizedBox(width: 8,),
+                      Icon(
+                        Ionicons.ticket_outline,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      SizedBox(width: 16,),
+                      Icon(
+                        Ionicons.star_outline,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16,),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "Fireside chat with Flutter + Firebase [Americas]",
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyleCustom.textTimerStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16,),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        "Meetups",
-                        style: TextStyleCustom.textTimerStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                    ],
+                  ),
+                  SizedBox(height: 16,),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          "Meetups",
+                          style: TextStyleCustom.textTimerStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 8,),
-                    Flexible(
-                      child: Text(
-                        "Open Source",
-                        style: TextStyleCustom.textTimerStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      SizedBox(width: 8,),
+                      Flexible(
+                        child: Text(
+                          "Open Source",
+                          style: TextStyleCustom.textTimerStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 8,),
-                    Flexible(
-                      child: Text(
-                        "Asia Pacific",
-                        style: TextStyleCustom.textTimerStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      SizedBox(width: 8,),
+                      Flexible(
+                        child: Text(
+                          "Asia Pacific",
+                          style: TextStyleCustom.textTimerStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
 
 
-        ],
+          ],
+        ),
       ),
     );
   }
+
+  void _launchURL(String _url) async =>
+      await canLaunch(_url) ? await launch(_url) : throw 'Could not launch $_url';
+
 
 }
